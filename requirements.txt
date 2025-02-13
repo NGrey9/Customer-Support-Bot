@@ -1,0 +1,9 @@
+ollama
+pandas
+ipykernel
+tqdm
+faiss-cpu
+python-dotenv
+Faker
+mysql-connector-python
+pymysql

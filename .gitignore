@@ -1,1 +1,10 @@
 __pycache__
+logs
+data
+Modelfile
+
+.env
+
+test.ipynb
+
+agents/product_description_agent/product_faiss_index.index
