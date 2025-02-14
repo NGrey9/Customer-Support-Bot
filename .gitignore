@@ -7,4 +7,4 @@ Modelfile
 
 test.ipynb
 
-agents/product_description_agent/product_faiss_index.index
+agents/product_description/product_faiss_db
