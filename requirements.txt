@@ -7,3 +7,4 @@ python-dotenv
 Faker
 mysql-connector-python
 pymysql
+pymongo

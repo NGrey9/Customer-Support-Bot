@@ -40,7 +40,7 @@ class ProductUpdateRequest(BaseModel):
     description: str
 
 
-class VectorDBAPI:
+class DatabaseAPI:
     def __init__(self, database_url: str = DB_URL,
                  index_path: str = INDEX_PATH,
                  embedding_model: str = AGENT_PRODUCT_DESCRIPTION):
@@ -97,3 +97,17 @@ class VectorDBAPI:
         self.vector_store.save_local(self.index_path)
 
         return {"message": "Vector database updated successfully", "product_id": product_id}
+
+    def query_product_name_sql(self, product_name: str):
+        with self.engine.connect() as conn:
+            try:
+                results = conn.execute(
+                    text(
+                        f"SELECT id, name, description FROM products WHERE name = \"{product_name}\"".strip("'"))
+                )
+                data = [{"id": row[0], "name": row[1], "description": row[2]}
+                        for row in results]
+                return f"Product: {product_name}\nDescription: {data[0]['description']}"
+            except Exception as e:
+                print(e)
+                return f"Product: {product_name} does not exist in the database."

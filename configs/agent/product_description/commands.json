@@ -1,0 +1,28 @@
+{
+    "commands":
+    [
+        "describe",
+        "provide_information",
+        "give_information",
+        "introduce",
+        "introduce_product",
+        "inform",
+        "get_info",
+        "get_information",
+        "get_product_details",
+        "identify",
+        "provide information",
+        "give information",
+        "introduce product",
+        "get information",
+        "get product detail",
+        "get product description",
+        "get_product_description",
+        "get info",
+        "describe product",
+        "inform product",
+        "provide information about",
+        "some informations about",
+        "provide some informations"
+    ]
+}

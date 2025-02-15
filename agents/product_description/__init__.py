@@ -1,1 +1,2 @@
-from product_description_agent import ProductDescriptionAgent
+from .product_description_agent import ProductDescriptionAgent
+from .database_api import DatabaseAPI
