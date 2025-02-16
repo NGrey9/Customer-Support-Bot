@@ -14,6 +14,7 @@ from langchain_experimental.llms.ollama_functions import OllamaFunctions
 from product_description import ProductDescriptionAgent
 from chat import ChatAgent
 from chat_history_manager import ChatHistoryManager
+from recommendation import RecommendationAgent
 from sql_database_api import DatabaseAPI
 from utils import load_commands
 
@@ -48,7 +49,7 @@ class AgentManager:
             "product_description")
         self.chat_history_manager = ChatHistoryManager()
         self.chat_agent = ChatAgent(self.chat_history_manager)
-
+        self.recommendation_agent = RecommendationAgent(self.sql_database_api)
         self.set_prompt_template()
         self.create_chain()
 
@@ -134,7 +135,11 @@ class AgentManager:
 
 if __name__ == "__main__":
     agent_manager = AgentManager()
-    user_message = "Ok, Thank you NhanBot. So do you remember my name?"
-    agent_manager.dispatch(session_id="00002",
-                           user_id="0001",
-                           user_message=user_message)
+    
+    # user_message = "Ok, Thank you NhanBot. So do you remember my name?"
+    # agent_manager.dispatch(session_id="00002",
+    #                        user_id="0001",
+    #                        user_message=user_message)
+
+    recommendation_agent = agent_manager.recommendation_agent
+    print(recommendation_agent.hybrid_recommend_product(1))

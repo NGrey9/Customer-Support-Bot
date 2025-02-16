@@ -8,3 +8,5 @@ Faker
 mysql-connector-python
 pymysql
 pymongo
+scipy
+scikit-learn

@@ -2,11 +2,8 @@ import os
 from typing import Optional, List
 from dotenv import load_dotenv
 
-from langchain.schema import Document
-from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
-
 
 from agent import Agent
 load_dotenv()

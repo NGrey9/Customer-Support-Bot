@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 
 import numpy as np
+import pandas as pd
 from pydantic import BaseModel
 import faiss
 from sqlalchemy import URL
@@ -111,3 +112,5 @@ class DatabaseAPI:
             except Exception as e:
                 print(e)
                 return f"Product: {product_name} does not exist in the database."
+
+    
