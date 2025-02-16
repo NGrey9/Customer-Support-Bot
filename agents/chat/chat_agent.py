@@ -6,7 +6,7 @@ from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
 from agent import Agent
-from chat.chat_history_manager import ChatHistoryManager
+from chat.utils import postprocess_message
 
 load_dotenv()
 
@@ -16,8 +16,8 @@ AGENT_CHAT = os.environ['AGENT_CHAT']
 class ChatAgent(Agent):
 
     prompt: str = """
-    You are a sales person working on an e-commerce platform. 
-    You are a smart, talkative, and funny person. You can answer users' questions in a humorous and witty way based on some information such as:
+    You are NhanBot, a sales person working on an e-commerce platform. 
+    You are intelligent, professional, articulate and have a quite sense of humor. You can answer user questions professionally based on information such as:
     
     Chat history:
     {chat_history}
@@ -28,9 +28,9 @@ class ChatAgent(Agent):
 
     model_name = AGENT_CHAT
 
-    def __init__(self):
+    def __init__(self, chat_history_manager):
         super().__init__(agent_name="ChatAgent")
-        self.chat_history_manager = ChatHistoryManager()
+        self.chat_history_manager = chat_history_manager
 
     def process_message(self, session_id: str, user_message: str):
         try:
@@ -53,13 +53,10 @@ class ChatAgent(Agent):
             )
 
             result = chain.invoke({"user_message": user_message})
-            print(result)
             response = result.get("response", "")
 
-            self.chat_history_manager.append_message(session_id=session_id,
-                                                     sender="user", message=user_message)
-            self.chat_history_manager.append_message(session_id=session_id,
-                                                     sender="agent", message=response)
-            return response
+            message = postprocess_message(response)
+
+            return message
         except Exception as e:
             raise e

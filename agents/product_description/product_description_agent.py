@@ -9,8 +9,6 @@ from langchain_core.output_parsers import StrOutputParser
 
 
 from agent import Agent
-from product_description.database_api import DatabaseAPI
-
 load_dotenv()
 
 AGENT_PRODUCT_DESCRIPTION = os.environ['AGENT_PRODUCT_DESCRIPTION']
@@ -29,9 +27,9 @@ class ProductDescriptionAgent(Agent):
         """
     model_name = AGENT_PRODUCT_DESCRIPTION
 
-    def __init__(self):
+    def __init__(self, sql_database_api):
         super().__init__(agent_name="ProductDescriptionAgent")
-        self.database_api = DatabaseAPI()
+        self.database_api = sql_database_api
         self.vector_store = self.database_api.vector_store
         self.create_chain()
 

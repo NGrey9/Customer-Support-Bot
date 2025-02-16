@@ -13,16 +13,14 @@ from langchain_experimental.llms.ollama_functions import OllamaFunctions
 
 from product_description import ProductDescriptionAgent
 from chat import ChatAgent
+from chat_history_manager import ChatHistoryManager
+from sql_database_api import DatabaseAPI
+from utils import load_commands
 
 
 load_dotenv()
 MODEL_NAME = os.environ['AGENT_MANAGER']
 LOGS_DIR = os.environ['LOGS_DIR']
-
-# Product Description
-PRODUCT_DESCRIPTION_COMMANDS = os.environ['PRODUCT_DESCRIPTION_COMMANDS']
-with open(PRODUCT_DESCRIPTION_COMMANDS, 'r') as f:
-    product_description_commands = json.load(f)
 
 
 class Requirement(BaseModel):
@@ -43,18 +41,14 @@ class Data(BaseModel):
 class AgentManager:
     def __init__(self, model_name=MODEL_NAME):
         self.llm = OllamaFunctions(model=model_name)
-        # self.registry = {
-        #     "product_description": {
-        #         "agent": ProductDescriptionAgent(),
-        #         "commands": product_description_commands["commands"]
-        #     },
-        #     "chat": {
-        #         "agent": ChatAgent()
-        #     }
-        # }
-        self.product_description_agent = ProductDescriptionAgent()
-        self.product_description_commands = product_description_commands["commands"]
-        self.chat_agent = ChatAgent()
+        self.sql_database_api = DatabaseAPI()
+        self.product_description_agent = ProductDescriptionAgent(
+            self.sql_database_api)
+        self.product_description_commands = load_commands(
+            "product_description")
+        self.chat_history_manager = ChatHistoryManager()
+        self.chat_agent = ChatAgent(self.chat_history_manager)
+
         self.set_prompt_template()
         self.create_chain()
 
@@ -68,7 +62,6 @@ class AgentManager:
                     "Return the required_action's value the verb or verb phrase mentioned by customer in the sentence that represents the action the user wants you to do."
                     "Return additional information be used for giving more action informations for additional_action_info's value else null"
                     "Return product_name's value if you know else null",
-                    # "Return the is_chat's value is 'yes' if the other person does not require any specific action, else 'no'.",
                 ),
                 ("human", "{user_message}"),
             ]
@@ -84,49 +77,64 @@ class AgentManager:
             raise e
 
     def extract_requirement(self, user_message: str):
+
+        list_requirements = []
         try:
             data_object = self.chain.invoke({"user_message": user_message})
-            return data_object, user_message
+            for requirement in data_object:
+                list_requirements.append([requirement[1][0].required_action.lower(),
+                                         requirement[1][0].additional_action_info,
+                                         requirement[1][0].product_name])
         except Exception as e:
-            return ("chat", user_message)
+            print(e)
+            list_requirements.append(["chat", "", ""])
 
-    def dispatch(self, user_message):
-        def handle_chat():
-            return self.chat_agent.process_message(session_id="0001",
-                                                   user_message=user_message)
+        return (list_requirements, user_message)
+
+    def update_chat_history(self, session_id: str,
+                            user_id: str,
+                            user_message: str,
+                            agent_message: str):
+        self.chat_history_manager.append_message(session_id=session_id,
+                                                 user_id=user_id,
+                                                 sender="user",
+                                                 message=user_message)
+        self.chat_history_manager.append_message(session_id=session_id,
+                                                 user_id=user_id,
+                                                 sender="agent",
+                                                 message=agent_message)
+
+    def dispatch(self, session_id: str, user_id: str, user_message: str):
 
         try:
-            requirements, user_message = self.extract_requirement(
+            list_requirements, user_message = self.extract_requirement(
                 user_message=user_message)
-            if requirements == "chat":
-                print(handle_chat())
-            else:
-                for requirement in requirements:
-                    print(type(requirement))
-                    print(requirement)
-                    print(requirement[0])
-                    print(requirement[1])
-                    print(type(requirement[1]))
-                    # print(requirement[1][0].required_action)
-                    # print(requirement[1][0]['required_action'])
-                    if requirement[1][0].required_action:
-                        required_action = requirement[1][0].required_action.lower(
-                        )
-                        if required_action in self.product_description_commands:
-                            response = self.product_description_agent.describe_product(
-                                requirement[1][0].product_name)
-                            print(response)
-                        else:
-                            print(handle_chat())
+            print(list_requirements)
 
-                    else:
-                        print(handle_chat())
+            for requirement in list_requirements:
+                required_action = requirement[0]
+                additional_action_info = requirement[1]
+                product_name = requirement[2]
+
+                if required_action in self.product_description_commands and product_name not in ["null", "", None]:
+                    agent_message = self.product_description_agent.describe_product(
+                        product_name=product_name)
+                else:
+                    agent_message = self.chat_agent.process_message(session_id=session_id,
+                                                                    user_message=user_message)
+
+                self.update_chat_history(session_id=session_id,
+                                         user_id=user_id,
+                                         user_message=user_message,
+                                         agent_message=agent_message)
+            print(agent_message)
         except Exception as e:
             raise e
 
 
 if __name__ == "__main__":
     agent_manager = AgentManager()
-    user_message = "I'm good. Haha!! Can you repeat my name?"
-    agent_manager.dispatch(user_message=user_message)
-    # print(agent_manager.extract_requirement(user_message=user_message))
+    user_message = "Ok, Thank you NhanBot. So do you remember my name?"
+    agent_manager.dispatch(session_id="00002",
+                           user_id="0001",
+                           user_message=user_message)
