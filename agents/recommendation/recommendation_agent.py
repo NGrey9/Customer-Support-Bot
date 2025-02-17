@@ -10,7 +10,6 @@ from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
 from sqlalchemy import text
 
-
 from agent import Agent
 load_dotenv()
 
@@ -162,7 +161,8 @@ class RecommendationAgent(Agent):
             if self.chain is None:
                 raise ValueError("Chain is not created")
             response = self.chain.invoke(user_id)
-            return response
+            message = self.postprocess_message(response)
+            return message
 
         except Exception as e:
             raise e

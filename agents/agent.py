@@ -33,3 +33,11 @@ class Agent:
 
     def create_prompt_template(self):
         self.prompt_template = ChatPromptTemplate.from_template(self.prompt)
+
+
+    def postprocess_message(self, agent_message: str):
+        try:
+            agent_message = agent_message.split('</think>')[-1]
+            return agent_message
+        except:
+            return agent_message

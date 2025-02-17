@@ -15,6 +15,7 @@ from product_description import ProductDescriptionAgent
 from chat import ChatAgent
 from chat_history_manager import ChatHistoryManager
 from recommendation import RecommendationAgent
+from add_to_cart import AddingAgent
 from sql_database_api import DatabaseAPI
 from utils import load_commands
 
@@ -49,9 +50,12 @@ class AgentManager:
             "product_description")
         self.recommendation_commands = load_commands(
             "recommendation")
+        self.adding_commands = load_commands(
+            "add_to_cart")
         self.chat_history_manager = ChatHistoryManager()
         self.chat_agent = ChatAgent(self.chat_history_manager)
         self.recommendation_agent = RecommendationAgent(self.sql_database_api)
+        self.adding_agent = AddingAgent(self.sql_database_api)
         self.set_prompt_template()
         self.create_chain()
 
@@ -61,10 +65,14 @@ class AgentManager:
                 (
                     "system",
                     "You are a salesperson, you are tactful and smart in understanding customer requirements. Your role is to extract customer request information based on the message provided by the customer."
+                    "You need to extract exactly what actions the user wants you to do."
                     "Based on the other person's messages, you can analyze what the other person wants you to do or what information you need him/her/them to provide."
+                    "In a sentence, if it starts with a verb, verb phrase, or 'please', 'You + <verb>', then these phrases may be a request from the user that you need to perform."
                     "Return the required_action's value the verb or verb phrase mentioned by customer in the sentence that represents the action the user wants you to do."
+                    "Product names are often capitalized phrases that go together, while these phrases often have a brand name in them."
+                    "Return product_name's value if you know else null."
+                    "The information between required_action and product_name will be additional_action_info."
                     "Return additional information be used for giving more action informations for additional_action_info's value else null"
-                    "Return product_name's value if you know else null",
                 ),
                 ("human", "{user_message}"),
             ]
@@ -125,6 +133,9 @@ class AgentManager:
                 elif required_action in self.recommendation_commands:
                     agent_message = self.recommendation_agent.recommend_product(
                         user_id=user_id)
+                elif required_action in self.adding_commands and product_name not in ["null", "", None]:
+                    agent_message = self.adding_agent.answer(user_id=user_id,
+                                                             product_name=product_name)
                 else:
                     agent_message = self.chat_agent.process_message(session_id=session_id,
                                                                     user_message=user_message)
@@ -141,7 +152,7 @@ class AgentManager:
 if __name__ == "__main__":
     agent_manager = AgentManager()
 
-    user_message = "suggest me a product to buy."
+    user_message = "put product Behr Premium Textured DECKOVER into my cart"
     agent_manager.dispatch(session_id="00002",
                            user_id="1",
                            user_message=user_message)

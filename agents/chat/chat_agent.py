@@ -6,7 +6,6 @@ from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
 from agent import Agent
-from chat.utils import postprocess_message
 
 load_dotenv()
 
@@ -55,7 +54,7 @@ class ChatAgent(Agent):
             result = chain.invoke({"user_message": user_message})
             response = result.get("response", "")
 
-            message = postprocess_message(response)
+            message = self.postprocess_message(response)
 
             return message
         except Exception as e:

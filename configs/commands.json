@@ -34,5 +34,17 @@
         "suggest product",
         "suggest a product",
         "suggest a product to buy"
+    ],
+    "add_to_cart":
+    [
+        "add",
+        "add product",
+        "add product to cart",
+        "add to cart",
+        "put",
+        "put product",
+        "put product in cart",
+        "put product in my cart",
+        "select and put in cart"
     ]
 }
