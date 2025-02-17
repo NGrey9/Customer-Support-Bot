@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
 
-from agent import Agent
+from agents.agent import Agent
 load_dotenv()
 
 AGENT_PRODUCT_DESCRIPTION = os.environ['AGENT_PRODUCT_DESCRIPTION']

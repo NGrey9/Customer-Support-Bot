@@ -7,7 +7,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 
 
-from agent import Agent
+from agents.agent import Agent
 from .adding_request import AddingRequest
 load_dotenv()
 

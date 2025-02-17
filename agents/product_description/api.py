@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
 
-from agents.product_description.database_api import DatabaseAPI, ProductUpdateRequest
+from agents import DatabaseAPI, ProductUpdateRequest
 from product_description_agent import ProductDescriptionAgent
 
 app = FastAPI()

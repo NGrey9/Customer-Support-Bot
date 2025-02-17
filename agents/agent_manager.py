@@ -11,13 +11,13 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama.llms import OllamaLLM
 from langchain_experimental.llms.ollama_functions import OllamaFunctions
 
-from product_description import ProductDescriptionAgent
-from chat import ChatAgent
-from chat_history_manager import ChatHistoryManager
-from recommendation import RecommendationAgent
-from add_to_cart import AddingAgent
-from sql_database_api import DatabaseAPI
-from utils import load_commands
+from agents.product_description import ProductDescriptionAgent
+from agents.chat import ChatAgent
+from agents.chat_history_manager import ChatHistoryManager
+from agents.recommendation import RecommendationAgent
+from agents.add_to_cart import AddingAgent
+from agents.sql_database_api import DatabaseAPI
+from agents.utils import load_commands
 
 
 load_dotenv()
@@ -144,7 +144,7 @@ class AgentManager:
                                          user_id=user_id,
                                          user_message=user_message,
                                          agent_message=agent_message)
-            print(agent_message)
+            return agent_message
         except Exception as e:
             raise e
 

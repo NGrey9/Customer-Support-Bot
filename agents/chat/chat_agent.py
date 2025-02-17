@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
-from agent import Agent
+from agents.agent import Agent
 
 load_dotenv()
 

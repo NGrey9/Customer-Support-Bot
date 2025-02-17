@@ -5,7 +5,7 @@ from datetime import datetime
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM, OllamaEmbeddings
 
-from logs import SetupLogging
+from agents.logs import SetupLogging
 
 
 from dotenv import load_dotenv
@@ -33,7 +33,6 @@ class Agent:
 
     def create_prompt_template(self):
         self.prompt_template = ChatPromptTemplate.from_template(self.prompt)
-
 
     def postprocess_message(self, agent_message: str):
         try:

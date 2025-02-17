@@ -10,7 +10,7 @@ from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
 from sqlalchemy import text
 
-from agent import Agent
+from agents.agent import Agent
 load_dotenv()
 
 AGENT_RECOMMENDATION = os.environ['AGENT_RECOMMENDATION']
