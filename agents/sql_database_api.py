@@ -110,7 +110,6 @@ class DatabaseAPI:
                         for row in results]
                 return f"Product: {product_name}\nDescription: {data[0]['description']}"
             except Exception as e:
-                print(e)
                 return f"Product: {product_name} does not exist in the database."
 
     

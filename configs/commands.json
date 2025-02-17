@@ -24,5 +24,15 @@
         "provide information about",
         "some informations about",
         "provide some informations"
+    ],
+    "recommendation":
+    [
+        "advice",
+        "give advice",
+        "recommend",
+        "suggest",
+        "suggest product",
+        "suggest a product",
+        "suggest a product to buy"
     ]
 }

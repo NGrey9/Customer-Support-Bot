@@ -47,6 +47,8 @@ class AgentManager:
             self.sql_database_api)
         self.product_description_commands = load_commands(
             "product_description")
+        self.recommendation_commands = load_commands(
+            "recommendation")
         self.chat_history_manager = ChatHistoryManager()
         self.chat_agent = ChatAgent(self.chat_history_manager)
         self.recommendation_agent = RecommendationAgent(self.sql_database_api)
@@ -120,6 +122,9 @@ class AgentManager:
                 if required_action in self.product_description_commands and product_name not in ["null", "", None]:
                     agent_message = self.product_description_agent.describe_product(
                         product_name=product_name)
+                elif required_action in self.recommendation_commands:
+                    agent_message = self.recommendation_agent.recommend_product(
+                        user_id=user_id)
                 else:
                     agent_message = self.chat_agent.process_message(session_id=session_id,
                                                                     user_message=user_message)
@@ -135,11 +140,8 @@ class AgentManager:
 
 if __name__ == "__main__":
     agent_manager = AgentManager()
-    
-    # user_message = "Ok, Thank you NhanBot. So do you remember my name?"
-    # agent_manager.dispatch(session_id="00002",
-    #                        user_id="0001",
-    #                        user_message=user_message)
 
-    recommendation_agent = agent_manager.recommendation_agent
-    print(recommendation_agent.hybrid_recommend_product(1))
+    user_message = "suggest me a product to buy."
+    agent_manager.dispatch(session_id="00002",
+                           user_id="1",
+                           user_message=user_message)

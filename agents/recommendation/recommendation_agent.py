@@ -6,6 +6,10 @@ import numpy as np
 from scipy.sparse.linalg import svds
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from langchain_core.output_parsers import StrOutputParser
+from sqlalchemy import text
+
 
 from agent import Agent
 load_dotenv()
@@ -16,7 +20,12 @@ AGENT_RECOMMENDATION = os.environ['AGENT_RECOMMENDATION']
 class RecommendationAgent(Agent):
 
     prompt = """
-    <prompt>
+    It is your responsibility, based on the product information below, to advise the customer to purchase this product because it is suitable for the customer.
+
+    Context: {context}
+    Recommendation query: {query}
+
+    Describe the product in detail to highlight its benefits and explain why it is suitable for this product.
     """
     model_name = AGENT_RECOMMENDATION
 
@@ -26,6 +35,7 @@ class RecommendationAgent(Agent):
         self.create_interaction_matrix()
         self.create_prediction_matrix(k=9)
         self.create_product_index_mapping()
+        self.creat_chain()
 
     def create_prediction_matrix(self, k: int):
         R = self.user_item_matrix.values
@@ -81,9 +91,7 @@ class RecommendationAgent(Agent):
     def get_cb_scores(self, user_id):
         user_profile = self.get_user_profile(user_id)
         if user_profile is None:
-            # Nếu user chưa mua sản phẩm nào, trả về mảng zeros
             return np.zeros(self.tfidf_matrix.shape[0])
-        # Tính cosine similarity: kết quả là mảng (1, n_products)
         user_profile_array = np.asarray(user_profile)
         tfidf_matrix_array = self.tfidf_matrix.toarray()
         scores = cosine_similarity(user_profile_array, tfidf_matrix_array)
@@ -94,19 +102,14 @@ class RecommendationAgent(Agent):
         if user_id not in self.user_item_matrix.index:
             return None
 
-        # Lấy danh sách product_ids theo thứ tự cột trong user_item_matrix (cũng là thứ tự của ma trận CF)
         cf_product_ids = self.user_item_matrix.columns
 
-        # CF scores: lấy từ ma trận R_hat
         user_idx = self.user_item_matrix.index.get_loc(user_id)
         cf_scores = self.R_hat[user_idx]
 
-        # CBF scores: lấy theo thứ tự sản phẩm trong products_df, sau đó ánh xạ lại theo cf_product_ids
-        # độ dài = số lượng sản phẩm trong products_df
         cb_scores_full = self.get_cb_scores(user_id)
         cb_scores = []
         for pid in cf_product_ids:
-            # Nếu product_id có mapping, lấy điểm CB; nếu không, gán 0
             if pid in self.product_index_mapping:
                 idx = self.product_index_mapping[pid]
                 cb_scores.append(cb_scores_full[idx])
@@ -114,7 +117,6 @@ class RecommendationAgent(Agent):
                 cb_scores.append(0)
         cb_scores = np.array(cb_scores)
 
-        # Hàm normalize: quy chuẩn điểm về khoảng [0, 1]
         def normalize(arr):
             if arr.max() == arr.min():
                 return np.zeros_like(arr)
@@ -123,18 +125,44 @@ class RecommendationAgent(Agent):
         cf_norm = normalize(cf_scores)
         cb_norm = normalize(cb_scores)
 
-        # Tính điểm cuối cùng theo trọng số alpha
         final_scores = alpha * cf_norm + (1 - alpha) * cb_norm
 
-        # Loại trừ các sản phẩm mà user đã mua
         purchased = set(
             self.user_item_matrix.columns[self.user_item_matrix.loc[user_id] > 0])
 
-        # Sắp xếp các sản phẩm theo final_scores giảm dần và chọn sản phẩm đầu tiên chưa mua
         sorted_indices = np.argsort(-final_scores)
         for idx in sorted_indices:
             product_id = cf_product_ids[idx]
             if product_id not in purchased:
                 return product_id
-
         return None
+
+    def create_context(self, user_id):
+        product_id = self.hybrid_recommend_product(user_id=int(user_id))
+        with self.sql_database_api.engine.connect() as conn:
+            result = conn.execute(
+                text(f"SELECT name, description FROM products WHERE id = {product_id}"))
+            data = [{"name": row[0], "description": row[1]}
+                    for row in result]
+            context = f"PRODUCT: {data[0]['name']}\nDESCRIPTION: {data[0]['description']}"
+        return context
+
+    def creat_chain(self):
+        try:
+            self.chain = RunnableParallel(
+                query=RunnablePassthrough(),
+                context=lambda x: self.create_context(x)
+            ) | self.prompt_template | self.llm | StrOutputParser()
+
+        except Exception as e:
+            raise e
+
+    def recommend_product(self, user_id: str) -> str:
+        try:
+            if self.chain is None:
+                raise ValueError("Chain is not created")
+            response = self.chain.invoke(user_id)
+            return response
+
+        except Exception as e:
+            raise e
