@@ -1,0 +1,61 @@
+# APPLICATION SETTINGS
+# ------------------
+APP_NAME = "<APP_NAME>"
+APP_ENV = "development" # development, staging, production
+APP_DEBUG = "true"
+APP_URL = "http://localhost"
+APP_PORT = "<service_port>"
+APP_SECRET_KEY = "your-secret-key-here"
+APP_TIMEZONE = "UTC"
+APP_DIR = "<path_to_root_dir>"
+CONFIG_DIR = "${APP_DIR}/configs"
+
+# DATABASE CONFIGURATIONS
+# ---------------------
+DB_DRIVER = "mysql+pymysql"
+DB_HOST = "localhost"
+DB_PORT = "3306"
+DB_NAME = "<your_db_name>"
+DB_USER = "<your_user>" 
+DB_PASSWORD = "<your_password>"
+DB_MAX_CONNECTIONS = 100
+DB_TIMEOUT = 30
+
+# VECTOR DATABASE CONFIGURATIONS
+PRODUCT_DESCRIPTION_FAISS_INDEX = "${APP_DIR}/data/product_faiss_db"
+VECTOR_DIM = 3584
+# LOGGING & MONITORING
+# ------------------
+LOGS_DIR = "${APP_DIR}/logs"
+LOG_CHANNEL = "stack"
+LOG_LEVEL = "debug"
+SENTRY_DSN = "your-sentry-dsn"
+NEW_RELIC_LICENSE_KEY = "your-new-relic-key"
+
+
+# MODEL CONFIGURATIONS
+AGENT_MANAGER = "llama3.1:8b"
+COMMANDS_CONFIG_PATH = "${CONFIG_DIR}/commands.json"
+
+
+
+
+# PRODUCT DESCRIPTION
+AGENT_PRODUCT_DESCRIPTION_DIR = "${APP_DIR}/agents/product_description"
+AGENT_PRODUCT_DESCRIPTION = "deepseek-r1"
+PRODUCT_DESCRIPTION_CONFIG_DIR = "${CONFIG_DIR}/agent/product_description"
+
+
+# CHAT
+AGENT_CHAT = "deepseek-r1"
+MONGODB_URI = "mongodb://localhost:27017/"
+MONGODB_NAME = "<mongodb_name_to_storage_the_chat_history>"
+COLLECTION = "<collection_name>"
+
+# RECOMMENDATION
+AGENT_RECOMMENDATION = "deepseek-r1"
+
+
+# ADDING AGENT
+AGENT_ADDING = "deepseek-r1"
+ADDING_ENDPOINT = "<adding_to_cart_test_endpoint>"
