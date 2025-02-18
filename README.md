@@ -21,7 +21,7 @@ $ ollama pull deepseek-r1
 
 Then you need to prepare yourself a simple ecommerce database with the structure below:
 
-![database_architecture](assets/erd.png)
+![database_architecture](https://github.com/NGrey9/Customer-Support-Bot/blob/main/assets/erd.png)
 
 and use `mongodb` to store chat history information between user and agent
 
@@ -66,4 +66,3 @@ The input of this endpoint is:
   "message": "Can you tell me some informations about the product named 'Apple iPhone 16 Pro Max'"
 }
 ```
-
